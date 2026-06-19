@@ -74,9 +74,9 @@ projview(
 
 # plot VSF comparison
 ax = fig.add_subplot(1, 2, 2, box_aspect=0.8)
-ax.errorbar(*box_vsf, label='Box ($z=0.5$)', c=colors[1])
+ax.errorbar(*box_vsf, label='Box ($z=0.5$)', c=colors[1], lw=lw)
 ax.errorbar(*cutsky_vsf, label='CMASS ($0.4 < z < 0.6$)', 
-            c='k', ls='--', zorder=100)
+            c='k', lw=lw, ls='--', zorder=100)
 ax.set_ylabel(r'$d n_v / d \ln R_v$ [$h^4{{\rm Mpc}}^{{-4}}$]', fontsize=fs)
 ax.set_xlabel('$R_v$ [$h^{-1}$Mpc]', fontsize=fs)
 ax.tick_params(axis='both', which='major', labelsize=fs * 3/4)

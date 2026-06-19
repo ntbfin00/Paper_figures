@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1.inset_locator import zoomed_inset_axes, mark_inset
 from matplotlib.patches import Circle 
 import matplotlib.colors as colors
-
+from copy import copy
 
 fs = 10  # fontsize
 ms = 0.01  # markersize
@@ -37,8 +37,6 @@ def load_slice(data_fn="data_positions.npy",
     # filter voids
     mask_sp = ((positions[:,axis] >= slice_range[0]) 
             & (positions[:,axis] <= slice_range[1]))
-    # void_pos = positions[mask_sp]
-    # void_rad = radii[mask_sp]
     voids_slice = voids[mask_sp]
     voids_slice = np.delete(voids_slice, 0, axis=1)
     voids_slice = np.delete(voids_slice, axis, axis=1)
@@ -87,10 +85,6 @@ def plot_slice(mesh_slice, voids_slice, membership_slice,
     # plot galaxies
     ax.imshow(mesh_slice.T, origin='lower', extent=(*boxlims, *boxlims),
               cmap=cmap, norm=colors.PowerNorm(0.3), rasterized=True)
-    for (i, void) in enumerate(voids_slice):
-        circ = Circle((void[0], void[1]), void[2], fill=False, edgecolor='goldenrod', 
-                      label=None if i>0 else 'Void')
-        ax.add_patch(circ)
 
     ax.set_xlabel(axes_labels[0] + r' $[h^{-1}{\rm Mpc}]$', fontsize=fs)
     ax.set_ylabel(axes_labels[1] + r' $[h^{-1}{\rm Mpc}]$', fontsize=fs)
@@ -118,11 +112,22 @@ def plot_slice(mesh_slice, voids_slice, membership_slice,
                                                  axis=axes[i])
 
     # plot chosen void in inset
-    membership_slice[membership_slice > 0] = -1
+    membership_slice[membership_slice > 0] = 1
     ax_zoom.imshow(membership_slice.mean(axis=axis).T, origin='lower',
-                   cmap=cmap, vmin=-1, vmax=0.1,
+                   cmap='Greys',# vmin=-1, vmax=0.1,
                    extent=(inset_xy[0], inset_xy[0] + 2*inset_pad, 
                            inset_xy[1], inset_xy[1] + 2*inset_pad))
+
+    for (i, void) in enumerate(voids_slice):
+        circ = Circle((void[0], void[1]), void[2], 
+                      fill=False, edgecolor='goldenrod')
+        circ_zoom = copy(circ)
+        circ_zoom.set_linewidth(2)
+
+        # add circles to main axes
+        ax.add_patch(circ)
+        # add circles to inset
+        ax_zoom.add_patch(circ_zoom)
 
     mark_inset(ax, ax_zoom, loc1=2, loc2=1, ec=inset_color, alpha=0.8)
     ax_zoom.set_xticks([])
